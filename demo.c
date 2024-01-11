@@ -11,27 +11,12 @@
 #include <sys/mman.h>
 #include <math.h>
 
-#include "fractal_noise.h"
 #include "constants.h"
 #include "manr.h"
 #include "canvas.h"
-#include "minunit.h"
 #include "window.h"
 
 int term_width, term_height;
-
-void animate_fractal_noise(Canvas* canvas, int* noise, int ticks){
-    for(int y=0; y<term_height; y++){
-        for(int x=0; x<term_width; x++){
-					int offset = x + y * MAX_VIEW_WIDTH;
-					int sample = noise[offset] + ticks;
-					int fg_color = sample / 32 % 10 + 30;
-					char* texture = " ./#";
-					setCanvasCharacter(canvas, x, y, texture[sample / 16 % 4]);
-					setCanvasFgColor(canvas, x, y, fg_color);
-        }
-    }
-}
 
 void draw_text(Canvas* canvas, int x, int y, char* text){
 	for(int i=0; i<strlen(text); i++){
@@ -62,7 +47,6 @@ void draw_sine(Canvas* canvas, int offset, float amplitude, float period){
 
 int main(){
 	int noise[MAX_VIEW_AREA];
-	fractal_noise(rand() % 128, 128, MAX_VIEW_WIDTH, 8, 1.0f, noise);
 	int quit = 0;
 	float ticks = 0.0f;
 	Window* window = createWindow();
@@ -92,16 +76,16 @@ int main(){
 		if(timescale <= -10.0f) timescale = -10.0f;
 		if(timescale >= 10.0f) timescale = 10.0f;
 
-			clear_canvas(window->canvas);
-			draw_sine(window->canvas, ticks, amplitude, period);
-			sprintf(message, "Amplitude [A/S]: %f, Frequency [D/F]: %f, Timescale [Z/X]: %f", amplitude, period, timescale);
-			draw_text(window->canvas, term_width / 2 - strlen(message) / 2,
-					term_height - 1, message);
-			draw_text(window->canvas, term_width / 2 - strlen(quit_message) / 2,
-					0, quit_message);
-			termRefresh(window);
-			ticks += timescale;
-	usleep(1000000/60);
+		clear_canvas(window->canvas);
+		draw_sine(window->canvas, ticks, amplitude, period);
+		sprintf(message, "Amplitude [A/S]: %f, Frequency [D/F]: %f, Timescale [Z/X]: %f", amplitude, period, timescale);
+		draw_text(window->canvas, term_width / 2 - strlen(message) / 2,
+				term_height - 1, message);
+		draw_text(window->canvas, term_width / 2 - strlen(quit_message) / 2,
+				0, quit_message);
+		termRefresh(window);
+		ticks += timescale;
+		usleep(1000000/60);
 	}
 	endTerm(window);
 	return 0;
